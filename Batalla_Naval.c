@@ -106,15 +106,22 @@ void disparar(int tablero[TAM_TAB][TAM_TAB] , int* cantAciertos){
 }
 
 void ponerBarco1(int tablero[TAM_TAB][TAM_TAB]){
-    int coorX , coorY;
+    int coorX , coorY , hayBarcoEnEspacio;
     
-    printf("Está colocando un barco de 1\n");
-    printf("Por favor ingrese las coordenadas de la posicion del barco:\n");
+    do{
+        hayBarcoEnEspacio = NO;
+        
+        printf("Está colocando un barco de 1\n");
+        printf("Por favor ingrese las coordenadas de la posicion del barco:\n");
     
-    coorY = pedirCoordenadaY();
-    coorX = pedirCoordenadaX();
-    
-    tablero[coorY][coorX] = BARCO;
+        coorY = pedirCoordenadaY();
+        coorX = pedirCoordenadaX();
+        
+        if(tablero[coorY][coorX] == BARCO){
+            printf("Ya hay un barco en ese espacio. Por favor ingrese una coordenada valida");
+            hayBarcoEnEspacio = SI;
+        }else tablero[coorY][coorX] = BARCO;
+    }while(hayBarcoEnEspacio);
 }
 
 int pedirCoordenadaX(){
@@ -179,29 +186,44 @@ void ponerBarco2(int tablero[TAM_TAB][TAM_TAB]){
 }
 
 void ponerBarcoMult(int tablero[TAM_TAB][TAM_TAB] , int cant){
-    int coorInX , coorInY , coorFinX , coorFinY , coorInvalidas=SI , espValidos=NO;
+    int coorInX , coorInY , coorFinX , coorFinY , coorInvalidas=SI , espValidos=NO , hayBarcoEnEspacio;
     
-    printf("Está colocando un barco de 3\n");
+    printf("Está colocando un barco de %d \n", cant);
     do{
-        printf("Por favor ingrese las coordenadas del primer espacio del barco:\n");
-        coorInY = pedirCoordenadaY();
-        coorInX = pedirCoordenadaX();
-        //tablero[coorY][coorX] = BARCO;
+        hayBarcoEnEspacio=NO;
+        do{
+            printf("Por favor ingrese las coordenadas del primer espacio del barco:\n");
+            coorInY = pedirCoordenadaY();
+            coorInX = pedirCoordenadaX();
+            //tablero[coorY][coorX] = BARCO;
     
-        printf("Por favor ingrese las coordenadas finales del barco:\n");
-        coorFinY = pedirCoordenadaY();
-        coorFinX = pedirCoordenadaX();
-        //tablero[coorY][coorX] = BARCO;
+            printf("Por favor ingrese las coordenadas finales del barco:\n");
+            coorFinY = pedirCoordenadaY();
+            coorFinX = pedirCoordenadaX();
+            //tablero[coorY][coorX] = BARCO;
         
-        if((coorInY==coorFinY) && (coorFinX - coorInX == cant-1)) espValidos=SI;
-        else if((coorInX==coorFinX) && (coorFinY - coorInY == cant-1)) espValidos=SI;
+            if((coorInY==coorFinY) && (coorFinX - coorInX == cant-1)) espValidos=SI;
+            else if((coorInX==coorFinX) && (coorFinY - coorInY == cant-1)) espValidos=SI;
         
-        if((((coorInY==coorFinY) && (coorInX!=coorFinX)) || ((coorInX==coorFinX) && (coorInY!=coorFinY)))&& (espValidos)) coorInvalidas=NO;
-        else printf("Debe ingresar unas coordenadas validas, intente nuevamente \n");
-    }while(coorInvalidas);
+            if((((coorInY==coorFinY) && (coorInX!=coorFinX)) || ((coorInX==coorFinX) && (coorInY!=coorFinY)))&& (espValidos)) coorInvalidas=NO;
+            else printf("Debe ingresar unas coordenadas validas, intente nuevamente \n");
+        }while(coorInvalidas);
     
-    for(int i=0 ; i<cant ; i++){
-        if(coorInY==coorFinY) tablero[coorInY][coorInX+i] = BARCO;
-        else tablero[coorInY+i][coorInX] = BARCO;
-    }
+        for(int i=0 ; i<cant ; i++){
+            if(coorInY==coorFinY){
+                if(tablero[coorInY][coorInX+i] == BARCO) hayBarcoEnEspacio = SI;
+            }else{
+                if(tablero[coorInY+i][coorInX] == BARCO) hayBarcoEnEspacio = SI;
+            } 
+        }
+    
+        if(hayBarcoEnEspacio){
+            printf("Ya hay un barco en ese espacio. Por favor ingresa una coordenada valida\n");
+        }else{
+            for(int i=0 ; i<cant ; i++){
+                if(coorInY==coorFinY) tablero[coorInY][coorInX+i] = BARCO;
+                else tablero[coorInY+i][coorInX] = BARCO;
+            }
+        }
+    }while(hayBarcoEnEspacio);
 }
