@@ -59,9 +59,9 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
     mostrarTablero(tablero_1 , jugador_1 , PRIV);
     disparar(tablero_1, &cantAciertos_1);
     mostrarTablero(tablero_1 , jugador_1 , PRIV);
-    printf("%d", cantAciertos_1);
+    //printf("%d", cantAciertos_1);
     disparar(tablero_1, &cantAciertos_1);
-    printf("%d", cantAciertos_1);
+    //printf("%d", cantAciertos_1);
     mostrarTablero(tablero_1 , jugador_1 , PRIV);
 }
 
@@ -125,11 +125,18 @@ void ponerBarco1(int tablero[TAM_TAB][TAM_TAB]){
 }
 
 int pedirCoordenadaX(){
-    int coorX;
-    printf("Ingrese la coordenada de X (1-10): ");
-    scanf("%d", &coorX);
-    coorX--;
-    
+    int coorX , valorInvalido;
+    do{
+        valorInvalido=NO;
+        printf("Ingrese la coordenada de X (1-10): ");
+        scanf("%d", &coorX);
+        coorX--;
+        if((coorX<0) || (coorX>9)){
+            printf("Valor fuera del rango permitido. Ingrese nuevamente.\n");
+            valorInvalido=SI;
+        }
+    }while(valorInvalido);
+     
     return(coorX);
 }
 
@@ -141,25 +148,25 @@ int pedirCoordenadaY(){
     scanf("%c", &coorLetra);
     switch (coorLetra){
         case 'a': 
-        case 'A': coorY=0 ; break;
+        case 'A': coorY=0; break;
         case 'b': 
-        case 'B': coorY=1 ; break;
+        case 'B': coorY=1; break;
         case 'c': 
-        case 'C': coorY=2 ; break;
+        case 'C': coorY=2; break;
         case 'd': 
-        case 'D': coorY=3 ; break;
+        case 'D': coorY=3; break;
         case 'e': 
-        case 'E': coorY=4 ; break;
+        case 'E': coorY=4; break;
         case 'f': 
-        case 'F': coorY=5 ; break;
+        case 'F': coorY=5; break;
         case 'g': 
-        case 'G': coorY=6 ; break;
+        case 'G': coorY=6; break;
         case 'h': 
-        case 'H': coorY=7 ; break;
+        case 'H': coorY=7; break;
         case 'i': 
-        case 'I': coorY=8 ; break;
+        case 'I': coorY=8; break;
         case 'j': 
-        case 'J': coorY=9 ; break;
+        case 'J': coorY=9; break;
     }
     return(coorY);
 }
