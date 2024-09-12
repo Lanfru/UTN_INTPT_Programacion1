@@ -1,5 +1,5 @@
 #include <stdio.h>
-//#include <stdio_ext.h>
+#include <stdio_ext.h>
 #include <string.h>
 
 #define TAM_TAB 10
@@ -7,7 +7,7 @@
 #define BARCO 1
 #define DESTRUIDO 2
 #define VACIO 3
-#define MAX_GOLPES 17 // 1*2 2*2 3*1 4*2
+#define MAX_GOLPES 3 // 4*1 + 3*2 + 2*3 + 4*1 = 20
 #define TAM_NOM 15
 #define PUB 0 
 #define PRIV 1
@@ -43,44 +43,54 @@ int main(){
 
 void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_TAB]){
     char jugador_1[TAM_NOM] , jugador_2[TAM_NOM];
-    int cantAciertos_1=0 , cantAciertos_2=0 , modoDeJuego=-1;
+    int cantAciertos_1=0 , cantAciertos_2=0 , modoDeJuego=-1 , turnos=1;
     pedirNombreJugador(jugador_1 , 1);
     
 
     do{
         modoDeJuego = menuDeJuego();
+        getchar();
 
         if(modoDeJuego==UNJUGADOR){
             printf("Comming Soon...\n");
         }else if(modoDeJuego==DOSJUGADORES){
-            //pedirNombreJugador(jugador_2 , 2);
+            pedirNombreJugador(jugador_2 , 2);
 
             colocarBarcos(tablero_1 , jugador_1);
-            printf("Todos los barcos de %s ya estan colocados. Por favor pasale el control a %s.", jugador_1 , jugador_2);
+            printf("Todos los barcos de %s ya estan colocados. Por favor pasale el control a %s.\n", jugador_1 , jugador_2);
+            printf("Presiona cualquier tecla para continuar...");
+            getchar();
             colocarBarcos(tablero_2 , jugador_2);
-
-            /*mostrarTablero(tablero_1 , jugador_1 , PUB);
-            ponerBarco1(tablero_1);
-            mostrarTablero(tablero_1 , jugador_1 , PUB);
-            ponerBarcoMult(tablero_1 , DOS);
-            mostrarTablero(tablero_1 , jugador_1 , PUB);
-            ponerBarcoMult(tablero_1 , TRES);
-            mostrarTablero(tablero_1 , jugador_1 , PUB);
-            ponerBarco1(tablero_1);
-            mostrarTablero(tablero_1 , jugador_1 , PUB);
-            ponerBarco1(tablero_1);
-            mostrarTablero(tablero_1 , jugador_1 , PRIV);
-            disparar(tablero_1, &cantAciertos_1);
-            mostrarTablero(tablero_1 , jugador_1 , PRIV);
-            disparar(tablero_1, &cantAciertos_1);
-            mostrarTablero(tablero_1 , jugador_1 , PRIV);*/
+            
+            do{
+                if(turnos%2){
+                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
+                    disparar(tablero_2, &cantAciertos_1);
+                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
+                    printf("Tiros acertados de %s: %d", jugador_1, cantAciertos_1);
+                    getchar();
+                }else{
+                    mostrarTablero(tablero_1 , jugador_2 , PRIV);
+                    disparar(tablero_1, &cantAciertos_2);
+                    mostrarTablero(tablero_1 , jugador_2 , PRIV);
+                    getchar();
+                    printf("Tiros acertados de %s: %d", jugador_2, cantAciertos_2);
+                }
+                turnos++;
+            }while((cantAciertos_1<MAX_GOLPES)||(cantAciertos_2<MAX_GOLPES)); 
+            
+            system("clear");
+            printf("El ganador es ");
+            if(cantAciertos_1==MAX_GOLPES) printf("%s",jugador_1);
+            else printf("%s",jugador_2);
+            getchar();
         }
     }while(modoDeJuego!=SALIR);
 }
 
 void mostrarTablero(int tablero[TAM_TAB][TAM_TAB] , char nombre[] , int esVisible){
     char letra = 'A';
-    //system("clear");
+    system("clear");
     printf("Está jugando %s \n", nombre);
     
     printf("   1 2 3 4 5 6 7 8 9 10\n");
@@ -156,9 +166,9 @@ int pedirCoordenadaX(){
 int pedirCoordenadaY(){
     int coorY;
     char coorLetra;
-    fflush(stdin);
+    //fflush(stdin);
     printf("Ingrese la coordenada de X (A-J): ");
-    //__fpurge(stdin);
+    __fpurge(stdin);
     scanf("%c", &coorLetra);
     switch (coorLetra){
         case 'a': 
@@ -262,14 +272,18 @@ void ponerBarcoMult(int tablero[TAM_TAB][TAM_TAB] , int cant){
 
 int menuDeJuego(){
     int respuesta;
+    system("clear");
 
     printf("Bienvenido a la Batalla Naval\n\n");
     printf("1_ Modo 1 jugador (VS IA)\n");
     printf("2_ Modo 2 jugadores (PVP)\n");
     printf("0_ Salir\n");
-    printf("Seleccione que opcion desea: ");
-    scanf("%d",&respuesta);
-
+    do{
+        printf("Seleccione que opcion desea: ");
+        scanf("%d",&respuesta);
+        if((respuesta!=UNJUGADOR)&&(respuesta!=DOSJUGADORES)&&(respuesta!=SALIR)) printf("Ingrese una opcion valida\n");
+    }while((respuesta!=UNJUGADOR)&&(respuesta!=DOSJUGADORES)&&(respuesta!=SALIR));
+    
     return(respuesta);
 }
 
@@ -279,7 +293,7 @@ void colocarBarcos(int tablero[TAM_TAB][TAM_TAB] , char nombre[]){
     mostrarTablero(tablero , nombre , PUB);
     ponerBarcoMult(tablero , TRES);
     mostrarTablero(tablero , nombre , PUB);
-    ponerBarcoMult(tablero , TRES);
+    /*ponerBarcoMult(tablero , TRES);
     mostrarTablero(tablero , nombre , PUB);
     ponerBarcoMult(tablero , DOS);
     mostrarTablero(tablero , nombre , PUB);
@@ -294,5 +308,5 @@ void colocarBarcos(int tablero[TAM_TAB][TAM_TAB] , char nombre[]){
     ponerBarco1(tablero);
     mostrarTablero(tablero , nombre , PUB);
     ponerBarco1(tablero);
-    mostrarTablero(tablero , nombre , PUB);
+    mostrarTablero(tablero , nombre , PUB);*/
 }
