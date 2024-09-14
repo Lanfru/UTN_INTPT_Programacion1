@@ -7,7 +7,7 @@
 #define BARCO 1
 #define DESTRUIDO 2
 #define VACIO 3
-#define MAX_GOLPES 3 // 4*1 + 3*2 + 2*3 + 4*1 = 20
+#define MAX_GOLPES 3 // 4*1 + 3*2 + 2*3 + 1*4 = 20
 #define TAM_NOM 15
 #define PUB 0 
 #define PRIV 1
@@ -77,7 +77,7 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
                     printf("Tiros acertados de %s: %d", jugador_2, cantAciertos_2);
                 }
                 turnos++;
-            }while((cantAciertos_1<MAX_GOLPES)||(cantAciertos_2<MAX_GOLPES)); 
+            }while((cantAciertos_1<MAX_GOLPES)&&(cantAciertos_2<MAX_GOLPES)); 
             
             system("clear");
             printf("El ganador es ");
@@ -200,7 +200,7 @@ void pedirNombreJugador(char nombre[] , int numero){
     scanf("%s",nombre);
 }
 
-void ponerBarco2(int tablero[TAM_TAB][TAM_TAB]){
+/*void ponerBarco2(int tablero[TAM_TAB][TAM_TAB]){
     int coorX , coorY;
     
     printf("Está colocando un barco de 2\n");
@@ -214,7 +214,7 @@ void ponerBarco2(int tablero[TAM_TAB][TAM_TAB]){
     coorY = pedirCoordenadaY();
     coorX = pedirCoordenadaX();
     tablero[coorY][coorX] = BARCO;
-}
+}*/
 
 void ponerBarcoMult(int tablero[TAM_TAB][TAM_TAB] , int cant){
     int coorInX , coorInY , coorFinX , coorFinY , coorInvalidas=SI , espValidos=NO , hayBarcoEnEspacio , aux;
