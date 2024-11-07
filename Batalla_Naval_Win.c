@@ -46,19 +46,20 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
     int cantAciertos_1=0 , cantAciertos_2=0 , modoDeJuego=-1 , turnos=1;
     pedirNombreJugador(jugador_1 , 1);
     
-
     do{
         modoDeJuego = menuDeJuego();
         getchar();
 
         if(modoDeJuego==UNJUGADOR){
-            printf("Comming Soon...\n");
+            printf("Comming Soon...\nPresiona ENTER para continuar...\n");
+            getchar();
         }else if(modoDeJuego==DOSJUGADORES){
             pedirNombreJugador(jugador_2 , 2);
 
             colocarBarcos(tablero_1 , jugador_1);
+            system("clear");
             printf("Todos los barcos de %s ya estan colocados. Por favor pasale el control a %s.\n", jugador_1 , jugador_2);
-            printf("Presiona cualquier tecla para continuar...");
+            printf("Presiona ENTER para continuar...\n");
             getchar();
             colocarBarcos(tablero_2 , jugador_2);
             
@@ -67,6 +68,7 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
                     mostrarTablero(tablero_2 , jugador_1 , PRIV);
                     disparar(tablero_2, &cantAciertos_1);
                     mostrarTablero(tablero_2 , jugador_1 , PRIV);
+                    getchar();
                     printf("Tiros acertados de %s: %d", jugador_1, cantAciertos_1);
                     getchar();
                 }else{
@@ -74,7 +76,8 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
                     disparar(tablero_1, &cantAciertos_2);
                     mostrarTablero(tablero_1 , jugador_2 , PRIV);
                     getchar();
-                    printf("Tiros acertados de %s: %d", jugador_2, cantAciertos_2);
+                    printf("Tiros acertados de %s: %d \n", jugador_2, cantAciertos_2);
+                    getchar();
                 }
                 turnos++;
             }while((cantAciertos_1<MAX_GOLPES)&&(cantAciertos_2<MAX_GOLPES)); 
@@ -83,6 +86,7 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
             printf("El ganador es ");
             if(cantAciertos_1==MAX_GOLPES) printf("%s",jugador_1);
             else printf("%s",jugador_2);
+            printf("\nPresiona ENTER para continuar...");
             getchar();
         }
     }while(modoDeJuego!=SALIR);
@@ -170,7 +174,8 @@ int pedirCoordenadaY(){
     printf("Ingrese la coordenada de X (A-J): ");
     __fpurge(stdin);
     scanf("%c", &coorLetra);
-    switch (coorLetra){
+    coorY = coorLetra&0x0f - 1;
+    /*switch (coorLetra){
         case 'a': 
         case 'A': coorY=0; break;
         case 'b': 
@@ -191,7 +196,7 @@ int pedirCoordenadaY(){
         case 'I': coorY=8; break;
         case 'j': 
         case 'J': coorY=9; break;
-    }
+    }*/
     return(coorY);
 }
 
@@ -309,4 +314,8 @@ void colocarBarcos(int tablero[TAM_TAB][TAM_TAB] , char nombre[]){
     mostrarTablero(tablero , nombre , PUB);
     ponerBarco1(tablero);
     mostrarTablero(tablero , nombre , PUB);*/
+    getchar();
+    printf("Disposicion final de tu tablero, buena suerte!");
+    getchar();
+    
 }
