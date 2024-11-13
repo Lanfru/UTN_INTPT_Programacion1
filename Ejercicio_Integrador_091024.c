@@ -1,437 +1,234 @@
+// Ejercicio Integrador 2do Parcial
 #include <stdio.h>
-#include <stdio_ext.h>
 #include <string.h>
 #include <time.h>
+#include <stdlib.h>
+#define MAX_CHAR 50
+#define MAX_EMP 60
+#define NO 0
+#define SI 1
+#define SUELDO 0
+#define CATEGORIA 1
+#define SALIR 6
+#define SUELDO_CAT_1 15000
+#define SUELDO_CAT_2 12000
+#define SUELDO_CAT_3 10000
+#define SUELDO_CAT_4 8000
+#define HORAS_BONIFICACION 180
+#define HORAS_FILTRO 100
 
-#define TAM_TAB 10
-#define AGUA 0
-#define BARCO 1
-#define DESTRUIDO 2
-#define VACIO 3
-#define MAX_GOLPES 3 // 4*1 + 3*2 + 2*3 + 1*4 = 20
-#define TAM_NOM 15
-#define PUB 0 
-#define PRIV 1
-#define DOS 2
-#define TRES 3 
-#define CUATRO 4
-#define NO 0 
-#define SI 1 
-#define UNJUGADOR 1
-#define DOSJUGADORES 2
-#define SALIR 0
-#define MAQ 0
-#define HUM 1
+typedef struct {
+	int cod; //Codigo unico de empleado
+	char nom[MAX_CHAR]; //Nombre del empleado
+	int cat; //Categoria del empleado (De 1 a 4)
+	int horas; //Horas trabajadas por el empleado
+	float sue; //Sueldo calculado del empleado
+} registro_t;
 
-void iniciarJuego(int[TAM_TAB][TAM_TAB] , int[TAM_TAB][TAM_TAB]);
-void mostrarTablero(int[TAM_TAB][TAM_TAB] , char[] , int);
-void disparar(int[TAM_TAB][TAM_TAB] , int*);
-void ponerBarco1(int[TAM_TAB][TAM_TAB]);
-void ponerBarco2(int[TAM_TAB][TAM_TAB]);
-void ponerBarcoMult(int[TAM_TAB][TAM_TAB] , int , int);
-int pedirCoordenadaX();
-int pedirCoordenadaY();
-void pedirNombreJugador(char[] , int);
-int menuDeJuego();
-void colocarBarcos(int[TAM_TAB][TAM_TAB] , char[]);
-void dispararMaquina(int[TAM_TAB][TAM_TAB] , int*);
+int menu();
+void cargarEmpleados(registro_t[]);
+void informeDeSueldos(registro_t[]);
+void filtrarEmpleadosPorHoras(registro_t[], registro_t[]);
+void sueldosPorCategoria(registro_t[]);
+void cantidadEmpleadosPorCategoria(registro_t[]);
 
 int main(){
-    int tablero_Jug1[TAM_TAB][TAM_TAB]={AGUA};
-    int tablero_Jug2[TAM_TAB][TAM_TAB]={AGUA};
-    
-    srand(time(NULL));
-    
-    iniciarJuego(tablero_Jug1 , tablero_Jug2);
+	registro_t empleados[MAX_EMP] = {-1,"",0,0,0.0};
+	registro_t empleadosPocasHoras[MAX_EMP]= {-1,"",0,0,0.0};
 
-    return 0;
+	int opcMenu;
+	srand(time(NULL));
+
+	do {
+		opcMenu = menu();
+		switch(opcMenu){
+		case 1:
+			cargarEmpleados(empleados);
+			break;
+		case 2:
+			informeDeSueldos(empleados);
+			break;
+		case 3:
+			filtrarEmpleadosPorHoras(empleados, empleadosPocasHoras);
+			break;
+		case 4:
+			sueldosPorCategoria(empleados);
+			break;
+		case 5:
+			cantidadEmpleadosPorCategoria(empleados);
+			break;
+		}
+	}while(opcMenu!=SALIR);
+
+	printf("Todo bien so far");
+	return 0;
 }
 
-void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_TAB]){
-    char jugador_1[TAM_NOM] , jugador_2[TAM_NOM];
-    int cantAciertos_1=0 , cantAciertos_2=0 , modoDeJuego=-1 , turnos=1 , cantAciertos_M=0;
-    pedirNombreJugador(jugador_1 , 1);
-    
-    do{
-        modoDeJuego = menuDeJuego();
-        getchar();
+int menu(){
+	int opc, invalida = SI;
+	printf("1_ Cargar Empleados\n");
+	printf("2_ Informe de Sueldos\n");
+	printf("3_ Filtrar Empleados por Horas Trabajadas\n");
+	printf("4_ Informe de Sueldos por Categoria (No lo muestra en orden :c )\n");
+	printf("5_ Informe de Cantidad de Empleados por Categoria\n");
+	printf("6_ Salir\n");
+	do {
+		printf("Tu opcion: ");
+		scanf("%d", &opc);
+		if((opc>=1)&&(opc<=6)) invalida = NO;
+		else printf("Ingrese una opcion valida.\n");
+	} while(invalida);
 
-        if(modoDeJuego==UNJUGADOR){
-            /*printf("Comming Soon...\nPresiona ENTER para continuar...\n");
-            getchar();*/
-            colocarBarcos(tablero_1 , jugador_1);
-            system("clear");
-            printf("Todos tus barcos fueron colocados. Por favor espera mientras la maquina elije la mejor disposicion contra ti.\n");
-            printf("Presiona ENTER para continuar...\n");
-            getchar();
-            colocarBarcos(tablero_2 , "Maquina");
-            printf("La maquina ha terminado.\n");
-            printf("Presiona ENTER para continuar...\n");
-            getchar();
-            
-            do{
-                if(turnos%2){
-                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
-                    disparar(tablero_2, &cantAciertos_1);
-                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
-                    getchar();
-                    printf("Tiros acertados de %s: %d", jugador_1, cantAciertos_1);
-                    getchar();
-                }else{
-                    mostrarTablero(tablero_1 , jugador_2 , PRIV);
-                    dispararMaquina(tablero_1, &cantAciertos_M);
-                    mostrarTablero(tablero_1 , "Maquina" , PRIV);
-                    getchar();
-                    printf("Tiros acertados por la Maquina: %d \n", cantAciertos_M);
-                    getchar();
-                }
-                turnos++;
-            }while((cantAciertos_1<MAX_GOLPES)&&(cantAciertos_M<MAX_GOLPES));
-            
-            system("clear");
-            printf("El ganador es ");
-            if(cantAciertos_1==MAX_GOLPES) printf("%s",jugador_1);
-            else printf("La MAQUINAAA!!!");
-            printf("\nPresiona ENTER para continuar...");
-            getchar();
-            
-        }else if(modoDeJuego==DOSJUGADORES){
-            pedirNombreJugador(jugador_2 , 2);
+	return(opc);
+}
+void cargarEmpleados(registro_t empleados[MAX_EMP]) {
+	int cont=0, codIngresado, pedirEmpleado=SI, bonificacion=0;
 
-            colocarBarcos(tablero_1 , jugador_1);
-            system("clear");
-            printf("Todos los barcos de %s ya estan colocados. Por favor pasale el control a %s.\n", jugador_1 , jugador_2);
-            printf("Presiona ENTER para continuar...\n");
-            getchar();
-            colocarBarcos(tablero_2 , jugador_2);
-            
-            do{
-                if(turnos%2){
-                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
-                    disparar(tablero_2, &cantAciertos_1);
-                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
-                    getchar();
-                    printf("Tiros acertados de %s: %d", jugador_1, cantAciertos_1);
-                    getchar();
-                }else{
-                    mostrarTablero(tablero_1 , jugador_2 , PRIV);
-                    getchar();
-                    disparar(tablero_1, &cantAciertos_2);
-                    mostrarTablero(tablero_1 , jugador_2 , PRIV);
-                    getchar();
-                    printf("Tiros acertados de %s: %d \n", jugador_2, cantAciertos_2);
-                    getchar();
-                }
-                turnos++;
-            }while((cantAciertos_1<MAX_GOLPES)&&(cantAciertos_2<MAX_GOLPES)); 
-            
-            system("clear");
-            printf("El ganador es ");
-            if(cantAciertos_1==MAX_GOLPES) printf("%s",jugador_1);
-            else printf("%s",jugador_2);
-            printf("\nPresiona ENTER para continuar...");
-            getchar();
-        }
-    }while(modoDeJuego!=SALIR);
+	do {
+		printf("Ingrese el codigo de empleado: ");
+		scanf("%d", &codIngresado);
+		if(codIngresado==0) pedirEmpleado = NO;
+		else {
+			empleados[cont].cod = codIngresado;
+			printf("Ingrese el nombre del Empleado: ");
+			scanf("%s", &empleados[cont].nom);
+			empleados[cont].cat = (rand() % (4 - 1 + 1)) + 1;
+			empleados[cont].horas = (rand() % (220 - 50 + 1)) + 50;
+			switch(empleados[cont].cat) {
+			case 1:
+				empleados[cont].sue = empleados[cont].horas * SUELDO_CAT_1;
+				if(empleados[cont].horas > HORAS_BONIFICACION) {
+					bonificacion = ((empleados[cont].horas - HORAS_BONIFICACION) * SUELDO_CAT_1 * 0.10);
+				}
+				break;
+			case 2:
+				empleados[cont].sue = empleados[cont].horas * SUELDO_CAT_2;
+				if(empleados[cont].horas > HORAS_BONIFICACION) {
+					bonificacion = ((empleados[cont].horas - HORAS_BONIFICACION) * SUELDO_CAT_2 * 0.10);
+				}
+				break;
+			case 3:
+				empleados[cont].sue = empleados[cont].horas * SUELDO_CAT_3;
+				if(empleados[cont].horas > HORAS_BONIFICACION) {
+					bonificacion = ((empleados[cont].horas - HORAS_BONIFICACION) * SUELDO_CAT_3 * 0.10);
+				}
+				break;
+			case 4:
+				empleados[cont].sue = empleados[cont].horas * SUELDO_CAT_4;
+				if(empleados[cont].horas > HORAS_BONIFICACION) {
+					bonificacion = ((empleados[cont].horas - HORAS_BONIFICACION) * SUELDO_CAT_4 * 0.10);
+				}
+				break;
+			}
+			empleados[cont].sue = empleados[cont].sue + bonificacion;
+
+		}
+		cont++;
+	} while(pedirEmpleado);
+	printf("\n");
 }
 
-void mostrarTablero(int tablero[TAM_TAB][TAM_TAB] , char nombre[] , int esVisible){
-    char letra = 'A';
-    system("clear");
-    printf("Está jugando %s \n", nombre);
-    
-    printf("   1 2 3 4 5 6 7 8 9 10\n");
-    for(int i=0 ; i<TAM_TAB ; i++){
-        for(int j=0 ; j<TAM_TAB ; j++){
-            if(j==0){
-                printf("%c  ", letra);
-                letra = letra + 1;
-            }
-            if(tablero[i][j]==DESTRUIDO) printf("X ");
-            else if(tablero[i][j]==VACIO) printf("  ");
-            else if(esVisible == PRIV){
-                if((tablero[i][j]==AGUA) || tablero[i][j]==BARCO) printf("O ");
-            }else {
-                if(tablero[i][j]==BARCO) printf("B ");
-                else if(tablero[i][j]==AGUA) printf("O ");
-            }
-        }
-        printf("\n");
-    }
+void informeDeSueldos(registro_t empleados[MAX_EMP]) {
+	int cont = 0;
+
+	do {
+		printf("\nCodigo de Empleado: %d\n", empleados[cont].cod);
+		printf("Nombre del Empleado: %s\n", empleados[cont].nom);
+		printf("Categoria del Empleado: %d\n", empleados[cont].cat);
+		printf("Horas del Empleado: %d\n", empleados[cont].horas);
+		printf("Sueldo del Empleado: $%f\n\n", empleados[cont].sue);
+		cont++;
+	} while(empleados[cont].cod!=0);
+	printf("\n");
 }
 
-void disparar(int tablero[TAM_TAB][TAM_TAB] , int* cantAciertos){
-    int coorX , coorY;
-    char coorLetra;
-    printf("Ingrese las coordenadas a donde desea disparar\n");
-    
-    coorY = pedirCoordenadaY();
-    coorX = pedirCoordenadaX();
-    
-    if(tablero[coorY][coorX]==AGUA) tablero[coorY][coorX] = VACIO;
-    else if(tablero[coorY][coorX]==BARCO){
-        tablero[coorY][coorX] = DESTRUIDO;
-        (*cantAciertos)++;
-    } 
+void filtrarEmpleadosPorHoras(registro_t empleados[MAX_EMP], registro_t empleadosPocasHoras[MAX_EMP]) {
+	int contEmpleados = 0, contEmpleadosPocasHoras = 0;
+
+	do {
+		if(empleados[contEmpleados].horas < HORAS_FILTRO) {
+			empleadosPocasHoras[contEmpleadosPocasHoras].cod = empleados[contEmpleados].cod;
+			strcpy(empleados[contEmpleados].nom, empleadosPocasHoras[contEmpleadosPocasHoras].nom);
+			empleadosPocasHoras[contEmpleadosPocasHoras].cat = empleados[contEmpleados].cat;
+			empleadosPocasHoras[contEmpleadosPocasHoras].horas = empleados[contEmpleados].horas;
+			empleadosPocasHoras[contEmpleadosPocasHoras].sue = empleados[contEmpleados].sue;
+			contEmpleadosPocasHoras++;
+		}
+		contEmpleados++;
+	} while(empleados[contEmpleados].cod!=0);
+
+	informeDeSueldos(empleadosPocasHoras);
+	printf("\n");
 }
 
-void ponerBarco1(int tablero[TAM_TAB][TAM_TAB]){
-    int coorX , coorY , hayBarcoEnEspacio;
-    
-    do{
-        hayBarcoEnEspacio = NO;
-        
-        printf("Está colocando un barco de 1\n");
-        printf("Por favor ingrese las coordenadas de la posicion del barco:\n");
-    
-        coorY = pedirCoordenadaY();
-        coorX = pedirCoordenadaX();
-        
-        if(tablero[coorY][coorX] == BARCO){
-            printf("Ya hay un barco en ese espacio. Por favor ingrese una coordenada valida\n");
-            hayBarcoEnEspacio = SI;
-        }else tablero[coorY][coorX] = BARCO;
-    }while(hayBarcoEnEspacio);
+void sueldosPorCategoria(registro_t empleados[MAX_EMP]) {
+	float acumCat[4] = {0.0};
+	int categorias[4] = {1,2,3,4};
+	float auxF;
+	int cont=0, auxI, i=0;
+
+	do {
+		switch(empleados[cont].cat) {
+		case 1:
+			acumCat[0] = acumCat[0] + empleados[cont].sue;
+			break;
+		case 2:
+			acumCat[1] = acumCat[1] + empleados[cont].sue;
+			break;
+		case 3:
+			acumCat[2] = acumCat[2] + empleados[cont].sue;
+			break;
+		case 4:
+			acumCat[3] = acumCat[3] + empleados[cont].sue;
+			break;
+		}
+		cont++;
+	} while(empleados[cont].cod!=0);
+
+	for(i=0; i<4; i++) {
+		for(int j=i+1; j<4-1; j++) {
+			if(acumCat[i]<acumCat[j]) {
+				auxF = acumCat[i];
+				acumCat[i] = acumCat[j];
+				acumCat[j] = auxF;
+
+				auxI = categorias[i];
+				categorias[i] = categorias[j];
+				categorias[j] = auxI;
+			}
+		}
+	}
+
+	for(i=0; i<4; i++) {
+		printf("La categoria %d acumulC3 $%f\n", categorias[i], acumCat[i]);
+	}
+	printf("\n");
 }
 
-int pedirCoordenadaX(){
-    int coorX , valorInvalido;
-    do{
-        valorInvalido=NO;
-        printf("Ingrese la coordenada de X (1-10): ");
-        scanf("%d", &coorX);
-        coorX--;
-        if((coorX<0) || (coorX>9)){
-            printf("Valor fuera del rango permitido. Ingrese nuevamente.\n");
-            valorInvalido=SI;
-        }
-    }while(valorInvalido);
-     
-    return(coorX);
-}
+void cantidadEmpleadosPorCategoria(registro_t empleados[MAX_EMP]) {
+	int cantCategorias[4] = {0,0,0,0};
+	int cont=0;
 
-int pedirCoordenadaY(){
-    int coorY;
-    char coorLetra;
-    //fflush(stdin);
-    printf("Ingrese la coordenada de X (A-J): ");
-    __fpurge(stdin);
-    scanf("%c", &coorLetra);
-    //coorY = coorLetra&0x0f - 1;
-    switch (coorLetra){
-        case 'a': 
-        case 'A': coorY=0; break;
-        case 'b': 
-        case 'B': coorY=1; break;
-        case 'c': 
-        case 'C': coorY=2; break;
-        case 'd': 
-        case 'D': coorY=3; break;
-        case 'e': 
-        case 'E': coorY=4; break;
-        case 'f': 
-        case 'F': coorY=5; break;
-        case 'g': 
-        case 'G': coorY=6; break;
-        case 'h': 
-        case 'H': coorY=7; break;
-        case 'i': 
-        case 'I': coorY=8; break;
-        case 'j': 
-        case 'J': coorY=9; break;
-    }
-    return(coorY);
-}
+	do {
+		switch(empleados[cont].cat) {
+		case 1:
+			cantCategorias[0]++;
+			break;
+		case 2:
+			cantCategorias[1]++;
+			break;
+		case 3:
+			cantCategorias[2]++;
+			break;
+		case 4:
+			cantCategorias[3]++;
+			break;
+		}
+		cont++;
+	} while(empleados[cont].cod!=0);
 
-void pedirNombreJugador(char nombre[] , int numero){
-    printf("Ingrese el nombre del Jugador %d \n", numero);
-    scanf("%s",nombre);
-}
-
-/*void ponerBarco2(int tablero[TAM_TAB][TAM_TAB]){
-    int coorX , coorY;
-    
-    printf("Está colocando un barco de 2\n");
-    
-    printf("Por favor ingrese las coordenadas del primer espacio del barco:\n");
-    coorY = pedirCoordenadaY();
-    coorX = pedirCoordenadaX();
-    tablero[coorY][coorX] = BARCO;
-    
-    printf("Por favor ingrese las coordenadas del segundo espacio del barco:\n");
-    coorY = pedirCoordenadaY();
-    coorX = pedirCoordenadaX();
-    tablero[coorY][coorX] = BARCO;
-}*/
-
-void ponerBarcoMult(int tablero[TAM_TAB][TAM_TAB] , int cant , int noEsMaquina){
-    int coorInX , coorInY , coorFinX , coorFinY , coorInvalidas=SI , espValidos=NO , hayBarcoEnEspacio , aux , esVertical;
-    
-    if(noEsMaquina){
-        printf("Está colocando un barco de %d \n", cant);
-        do{
-            hayBarcoEnEspacio=NO;
-            do{
-                printf("Por favor ingrese las coordenadas del primer espacio del barco:\n");
-                coorInY = pedirCoordenadaY();
-                coorInX = pedirCoordenadaX();
-                //tablero[coorY][coorX] = BARCO;
-    
-                printf("Por favor ingrese las coordenadas finales del barco:\n");
-                coorFinY = pedirCoordenadaY();
-                coorFinX = pedirCoordenadaX();
-                //tablero[coorY][coorX] = BARCO;
-
-                if(coorFinY<coorInY){
-                    aux = coorFinY;
-                    coorFinY = coorInY;
-                    coorInY = aux;
-                }
-                if(coorFinX<coorInX){
-                    aux = coorFinX;
-                    coorFinX = coorInX;
-                    coorInX = aux;
-                }
-        
-                if((coorInY==coorFinY) && (coorFinX - coorInX == cant-1)) espValidos=SI;
-                else if((coorInX==coorFinX) && (coorFinY - coorInY == cant-1)) espValidos=SI;
-        
-                if((((coorInY==coorFinY) && (coorInX!=coorFinX)) || ((coorInX==coorFinX) && (coorInY!=coorFinY)))&& (espValidos)) coorInvalidas=NO;
-                else printf("Debe ingresar unas coordenadas validas, intente nuevamente \n");
-            }while(coorInvalidas);
-    
-            for(int i=0 ; i<cant ; i++){
-                if(coorInY==coorFinY){
-                    if(tablero[coorInY][coorInX+i] == BARCO) hayBarcoEnEspacio = SI;
-                }else{
-                    if(tablero[coorInY+i][coorInX] == BARCO) hayBarcoEnEspacio = SI;
-                } 
-            }
-    
-            if(hayBarcoEnEspacio){
-                printf("Ya hay un barco en ese espacio. Por favor ingresa una coordenada valida\n");
-            }else{
-                for(int i=0 ; i<cant ; i++){
-                    if(coorInY==coorFinY) tablero[coorInY][coorInX+i] = BARCO;
-                    else tablero[coorInY+i][coorInX] = BARCO;
-                }
-            }
-        }while(hayBarcoEnEspacio);
-    }else{
-        //Maquina
-        do{
-            hayBarcoEnEspacio=NO;
-            
-            coorInY = (rand() % (10 - 0 + 1)) + 0;
-            coorInX = (rand() % (10 - 0 + 1)) + 0;
-            
-            esVertical = (rand() % (1 - 0 + 1)) + 0;
-        
-            if(esVertical){
-                if((coorInY + cant) < 10){
-                    coorFinY = coorInY + cant;
-                    coorFinX = coorInX;
-                }else{
-                    coorFinY = coorInY;
-                    coorInY = coorInY - cant;
-                    coorFinX = coorInX;
-                }
-            }else{
-                if((coorInX + cant) < 10){
-                    coorFinX = coorInX + cant;
-                    coorFinY = coorInY;
-                }else{
-                    coorFinX = coorInX;
-                    coorInX = coorInX - cant;
-                    coorFinY = coorInY;
-                }   
-            }
-        
-            for(int i=0 ; i<cant ; i++){
-                if(coorInY==coorFinY){
-                    if(tablero[coorInY][coorInX+i] == BARCO) hayBarcoEnEspacio = SI;
-                }else{
-                    if(tablero[coorInY+i][coorInX] == BARCO) hayBarcoEnEspacio = SI;
-                } 
-            }
-    
-            if(!hayBarcoEnEspacio){
-                for(int i=0 ; i<cant ; i++){
-                    if(coorInY==coorFinY) tablero[coorInY][coorInX+i] = BARCO;
-                    else tablero[coorInY+i][coorInX] = BARCO;
-                }
-            }
-        
-        }while(hayBarcoEnEspacio);
-    }
-}
-
-int menuDeJuego(){
-    int respuesta;
-    system("clear");
-
-    printf("Bienvenido a la Batalla Naval\n\n");
-    printf("1_ Modo 1 jugador (VS IA)\n");
-    printf("2_ Modo 2 jugadores (PVP)\n");
-    printf("0_ Salir\n");
-    do{
-        printf("Seleccione que opcion desea: ");
-        scanf("%d",&respuesta);
-        if((respuesta!=UNJUGADOR)&&(respuesta!=DOSJUGADORES)&&(respuesta!=SALIR)) printf("Ingrese una opcion valida\n");
-    }while((respuesta!=UNJUGADOR)&&(respuesta!=DOSJUGADORES)&&(respuesta!=SALIR));
-    
-    return(respuesta);
-}
-
-void colocarBarcos(int tablero[TAM_TAB][TAM_TAB] , char nombre[]){
-    if(nombre == "Maquina"){
-        /*printf("Maquina poniendo barquitos xd");
-        getchar();*/
-        ponerBarcoMult(tablero , CUATRO , MAQ);
-        ponerBarcoMult(tablero , TRES , MAQ);
-        ponerBarcoMult(tablero , TRES , MAQ);
-        ponerBarcoMult(tablero , DOS , MAQ);
-        ponerBarcoMult(tablero , DOS , MAQ);
-        ponerBarcoMult(tablero , DOS , MAQ);
-        mostrarTablero(tablero , "Maquina" , PUB);
-    }else{
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarcoMult(tablero , CUATRO , HUM);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarcoMult(tablero , TRES , HUM);
-        mostrarTablero(tablero , nombre , PUB);
-        /*ponerBarcoMult(tablero , TRES);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarcoMult(tablero , DOS);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarcoMult(tablero , DOS);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarcoMult(tablero , DOS);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarco1(tablero);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarco1(tablero);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarco1(tablero);
-        mostrarTablero(tablero , nombre , PUB);
-        ponerBarco1(tablero);
-        mostrarTablero(tablero , nombre , PUB);*/
-        getchar();
-        printf("Disposicion final de tu tablero, buena suerte!");
-        getchar();
-    }
-}
-
-void dispararMaquina(int tablero[TAM_TAB][TAM_TAB] , int* cantAciertos){
-    int coorX , coorY , disparoExito;
-    char coorLetra;
-    
-    coorY = (rand() % (10 - 0 + 1)) + 0;
-    coorX = (rand() % (10 - 0 + 1)) + 0;
-    
-    if(tablero[coorY][coorX]==AGUA) tablero[coorY][coorX] = VACIO;
-    else if(tablero[coorY][coorX]==BARCO){
-        tablero[coorY][coorX] = DESTRUIDO;
-        (*cantAciertos)++;
-    }
+	for(int i=0; i<4; i++) {
+		printf("La categoria %d tiene %d empleados\n", (i+1), cantCategorias[i]);
+	}
+	printf("\n");
 }
