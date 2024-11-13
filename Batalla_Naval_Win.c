@@ -19,13 +19,15 @@
 #define UNJUGADOR 1
 #define DOSJUGADORES 2
 #define SALIR 0
+#define MAQ 0
+#define HUM 1
 
 void iniciarJuego(int[TAM_TAB][TAM_TAB] , int[TAM_TAB][TAM_TAB]);
 void mostrarTablero(int[TAM_TAB][TAM_TAB] , char[] , int);
 void disparar(int[TAM_TAB][TAM_TAB] , int*);
 void ponerBarco1(int[TAM_TAB][TAM_TAB]);
 void ponerBarco2(int[TAM_TAB][TAM_TAB]);
-void ponerBarcoMult(int[TAM_TAB][TAM_TAB] , int);
+void ponerBarcoMult(int[TAM_TAB][TAM_TAB] , int , int);
 int pedirCoordenadaX();
 int pedirCoordenadaY();
 void pedirNombreJugador(char[] , int);
@@ -51,7 +53,16 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
         getchar();
 
         if(modoDeJuego==UNJUGADOR){
-            printf("Comming Soon...\nPresiona ENTER para continuar...\n");
+            /*printf("Comming Soon...\nPresiona ENTER para continuar...\n");
+            getchar();*/
+            colocarBarcos(tablero_1 , jugador_1);
+            system("clear");
+            printf("Todos tus barcos fueron colocados. Por favor espera mientras la maquina elije la mejor disposicion contra ti.\n");
+            printf("Presiona ENTER para continuar...\n");
+            getchar();
+            colocarBarcos(tablero_2 , "Maquina");
+            printf("La maquina ha terminado.\n");
+            printf("Presiona ENTER para continuar...\n");
             getchar();
         }else if(modoDeJuego==DOSJUGADORES){
             pedirNombreJugador(jugador_2 , 2);
@@ -174,8 +185,8 @@ int pedirCoordenadaY(){
     printf("Ingrese la coordenada de X (A-J): ");
     __fpurge(stdin);
     scanf("%c", &coorLetra);
-    coorY = coorLetra&0x0f - 1;
-    /*switch (coorLetra){
+    //coorY = coorLetra&0x0f - 1;
+    switch (coorLetra){
         case 'a': 
         case 'A': coorY=0; break;
         case 'b': 
@@ -196,7 +207,7 @@ int pedirCoordenadaY(){
         case 'I': coorY=8; break;
         case 'j': 
         case 'J': coorY=9; break;
-    }*/
+    }
     return(coorY);
 }
 
@@ -221,58 +232,62 @@ void pedirNombreJugador(char nombre[] , int numero){
     tablero[coorY][coorX] = BARCO;
 }*/
 
-void ponerBarcoMult(int tablero[TAM_TAB][TAM_TAB] , int cant){
+void ponerBarcoMult(int tablero[TAM_TAB][TAM_TAB] , int cant , int noEsMaquina){
     int coorInX , coorInY , coorFinX , coorFinY , coorInvalidas=SI , espValidos=NO , hayBarcoEnEspacio , aux;
     
-    printf("Está colocando un barco de %d \n", cant);
+    if(NoEsMaquina){
+        printf("Está colocando un barco de %d \n", cant);
     do{
         hayBarcoEnEspacio=NO;
-        do{
-            printf("Por favor ingrese las coordenadas del primer espacio del barco:\n");
-            coorInY = pedirCoordenadaY();
-            coorInX = pedirCoordenadaX();
-            //tablero[coorY][coorX] = BARCO;
+            do{
+                printf("Por favor ingrese las coordenadas del primer espacio del barco:\n");
+                coorInY = pedirCoordenadaY();
+                coorInX = pedirCoordenadaX();
+                //tablero[coorY][coorX] = BARCO;
     
-            printf("Por favor ingrese las coordenadas finales del barco:\n");
-            coorFinY = pedirCoordenadaY();
-            coorFinX = pedirCoordenadaX();
-            //tablero[coorY][coorX] = BARCO;
+                printf("Por favor ingrese las coordenadas finales del barco:\n");
+                coorFinY = pedirCoordenadaY();
+                coorFinX = pedirCoordenadaX();
+                //tablero[coorY][coorX] = BARCO;
 
-            if(coorFinY<coorInY){
-                aux = coorFinY;
-                coorFinY = coorInY;
-                coorInY = aux;
-            }
-            if(coorFinX<coorInX){
-                aux = coorFinX;
-                coorFinX = coorInX;
-                coorInX = aux;
-            }
+                if(coorFinY<coorInY){
+                    aux = coorFinY;
+                    coorFinY = coorInY;
+                    coorInY = aux;
+                }
+                if(coorFinX<coorInX){
+                    aux = coorFinX;
+                    coorFinX = coorInX;
+                    coorInX = aux;
+                }
         
-            if((coorInY==coorFinY) && (coorFinX - coorInX == cant-1)) espValidos=SI;
-            else if((coorInX==coorFinX) && (coorFinY - coorInY == cant-1)) espValidos=SI;
+                if((coorInY==coorFinY) && (coorFinX - coorInX == cant-1)) espValidos=SI;
+                else if((coorInX==coorFinX) && (coorFinY - coorInY == cant-1)) espValidos=SI;
         
-            if((((coorInY==coorFinY) && (coorInX!=coorFinX)) || ((coorInX==coorFinX) && (coorInY!=coorFinY)))&& (espValidos)) coorInvalidas=NO;
-            else printf("Debe ingresar unas coordenadas validas, intente nuevamente \n");
-        }while(coorInvalidas);
+                if((((coorInY==coorFinY) && (coorInX!=coorFinX)) || ((coorInX==coorFinX) && (coorInY!=coorFinY)))&& (espValidos)) coorInvalidas=NO;
+                else printf("Debe ingresar unas coordenadas validas, intente nuevamente \n");
+            }while(coorInvalidas);
     
-        for(int i=0 ; i<cant ; i++){
-            if(coorInY==coorFinY){
-                if(tablero[coorInY][coorInX+i] == BARCO) hayBarcoEnEspacio = SI;
-            }else{
-                if(tablero[coorInY+i][coorInX] == BARCO) hayBarcoEnEspacio = SI;
-            } 
-        }
-    
-        if(hayBarcoEnEspacio){
-            printf("Ya hay un barco en ese espacio. Por favor ingresa una coordenada valida\n");
-        }else{
             for(int i=0 ; i<cant ; i++){
-                if(coorInY==coorFinY) tablero[coorInY][coorInX+i] = BARCO;
-                else tablero[coorInY+i][coorInX] = BARCO;
+                if(coorInY==coorFinY){
+                    if(tablero[coorInY][coorInX+i] == BARCO) hayBarcoEnEspacio = SI;
+                }else{
+                    if(tablero[coorInY+i][coorInX] == BARCO) hayBarcoEnEspacio = SI;
+                } 
             }
-        }
-    }while(hayBarcoEnEspacio);
+    
+            if(hayBarcoEnEspacio){
+                printf("Ya hay un barco en ese espacio. Por favor ingresa una coordenada valida\n");
+            }else{
+                for(int i=0 ; i<cant ; i++){
+                    if(coorInY==coorFinY) tablero[coorInY][coorInX+i] = BARCO;
+                    else tablero[coorInY+i][coorInX] = BARCO;
+                }
+            }
+        }while(hayBarcoEnEspacio);
+    }else{
+        
+    }
 }
 
 int menuDeJuego(){
@@ -293,29 +308,35 @@ int menuDeJuego(){
 }
 
 void colocarBarcos(int tablero[TAM_TAB][TAM_TAB] , char nombre[]){
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarcoMult(tablero , CUATRO);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarcoMult(tablero , TRES);
-    mostrarTablero(tablero , nombre , PUB);
-    /*ponerBarcoMult(tablero , TRES);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarcoMult(tablero , DOS);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarcoMult(tablero , DOS);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarcoMult(tablero , DOS);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarco1(tablero);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarco1(tablero);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarco1(tablero);
-    mostrarTablero(tablero , nombre , PUB);
-    ponerBarco1(tablero);
-    mostrarTablero(tablero , nombre , PUB);*/
-    getchar();
-    printf("Disposicion final de tu tablero, buena suerte!");
-    getchar();
-    
+    if(nombre == "Maquina"){
+        /*printf("Maquina poniendo barquitos xd");
+        getchar();*/
+        ponerBarcoMult(tablero , CUATRO , MAQ);
+        ponerBarcoMult(tablero , TRES , MAQ);
+    }else{
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarcoMult(tablero , CUATRO , HUM);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarcoMult(tablero , TRES , HUM);
+        mostrarTablero(tablero , nombre , PUB);
+        /*ponerBarcoMult(tablero , TRES);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarcoMult(tablero , DOS);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarcoMult(tablero , DOS);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarcoMult(tablero , DOS);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarco1(tablero);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarco1(tablero);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarco1(tablero);
+        mostrarTablero(tablero , nombre , PUB);
+        ponerBarco1(tablero);
+        mostrarTablero(tablero , nombre , PUB);*/
+        getchar();
+        printf("Disposicion final de tu tablero, buena suerte!");
+        getchar();
+    }
 }
