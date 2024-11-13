@@ -34,6 +34,7 @@ int pedirCoordenadaY();
 void pedirNombreJugador(char[] , int);
 int menuDeJuego();
 void colocarBarcos(int[TAM_TAB][TAM_TAB] , char[]);
+void dispararMaquina(int[TAM_TAB][TAM_TAB] , int*);
 
 int main(){
     int tablero_Jug1[TAM_TAB][TAM_TAB]={AGUA};
@@ -48,7 +49,7 @@ int main(){
 
 void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_TAB]){
     char jugador_1[TAM_NOM] , jugador_2[TAM_NOM];
-    int cantAciertos_1=0 , cantAciertos_2=0 , modoDeJuego=-1 , turnos=1;
+    int cantAciertos_1=0 , cantAciertos_2=0 , modoDeJuego=-1 , turnos=1 , cantAciertos_M=0;
     pedirNombreJugador(jugador_1 , 1);
     
     do{
@@ -67,6 +68,33 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
             printf("La maquina ha terminado.\n");
             printf("Presiona ENTER para continuar...\n");
             getchar();
+            
+            do{
+                if(turnos%2){
+                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
+                    disparar(tablero_2, &cantAciertos_1);
+                    mostrarTablero(tablero_2 , jugador_1 , PRIV);
+                    getchar();
+                    printf("Tiros acertados de %s: %d", jugador_1, cantAciertos_1);
+                    getchar();
+                }else{
+                    mostrarTablero(tablero_1 , jugador_2 , PRIV);
+                    dispararMaquina(tablero_1, &cantAciertos_M);
+                    mostrarTablero(tablero_1 , "Maquina" , PRIV);
+                    getchar();
+                    printf("Tiros acertados por la Maquina: %d \n", cantAciertos_M);
+                    getchar();
+                }
+                turnos++;
+            }while((cantAciertos_1<MAX_GOLPES)&&(cantAciertos_M<MAX_GOLPES));
+            
+            system("clear");
+            printf("El ganador es ");
+            if(cantAciertos_1==MAX_GOLPES) printf("%s",jugador_1);
+            else printf("La MAQUINAAA!!!");
+            printf("\nPresiona ENTER para continuar...");
+            getchar();
+            
         }else if(modoDeJuego==DOSJUGADORES){
             pedirNombreJugador(jugador_2 , 2);
 
@@ -87,6 +115,7 @@ void iniciarJuego(int tablero_1[TAM_TAB][TAM_TAB] , int tablero_2[TAM_TAB][TAM_T
                     getchar();
                 }else{
                     mostrarTablero(tablero_1 , jugador_2 , PRIV);
+                    getchar();
                     disparar(tablero_1, &cantAciertos_2);
                     mostrarTablero(tablero_1 , jugador_2 , PRIV);
                     getchar();
@@ -390,5 +419,19 @@ void colocarBarcos(int tablero[TAM_TAB][TAM_TAB] , char nombre[]){
         getchar();
         printf("Disposicion final de tu tablero, buena suerte!");
         getchar();
+    }
+}
+
+void dispararMaquina(int tablero[TAM_TAB][TAM_TAB] , int* cantAciertos){
+    int coorX , coorY , disparoExito;
+    char coorLetra;
+    
+    coorY = (rand() % (10 - 0 + 1)) + 0;
+    coorX = (rand() % (10 - 0 + 1)) + 0;
+    
+    if(tablero[coorY][coorX]==AGUA) tablero[coorY][coorX] = VACIO;
+    else if(tablero[coorY][coorX]==BARCO){
+        tablero[coorY][coorX] = DESTRUIDO;
+        (*cantAciertos)++;
     }
 }
